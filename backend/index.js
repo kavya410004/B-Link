@@ -9,7 +9,6 @@ import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import rateLimit from 'express-rate-limit';
 import { ethers } from 'ethers'; 
-// import contractABI from './contractABI';
 
 const __filename = fileURLToPath(import.meta.url);
 const _dirname = dirname(__filename);
