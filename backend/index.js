@@ -8,6 +8,8 @@ import { dirname } from 'path';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import rateLimit from 'express-rate-limit';
+import { ethers } from 'ethers'; 
+// import contractABI from './contractABI';
 
 const __filename = fileURLToPath(import.meta.url);
 const _dirname = dirname(__filename);
@@ -16,21 +18,14 @@ dotenv.config();
 
 const app = express();
 
-// Configure CORS
-// app.use(cors({
-//     origin: process.env.NODE_ENV === 'production' 
-//         ? process.env.FRONTEND_URL 
-//         : 'http://localhost:5173', // Default Vite dev server port
-//     credentials: true,
-//     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-//     allowedHeaders: ['Content-Type', 'Authorization']
-// }));
+
+
 app.use(cors({
     origin: 'http://localhost:5173',
     credentials: true, 
 }));
 
-// Security headers
+
 app.use((req, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Frame-Options', 'DENY');
@@ -42,7 +37,7 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(cookieParser());
 
-// Configure session
+
 app.use(session({
     secret: process.env.SESSION_SECRET || 'your-secret-key', 
     resave: false,
@@ -50,21 +45,16 @@ app.use(session({
     cookie: {
         secure: process.env.NODE_ENV === 'production',
         httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+        maxAge: 24 * 60 * 60 * 1000
     }
 }));
 
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100 // limit each IP to 100 requests per windowMs
-});
-app.use(limiter);
 
 const pool = new pg.Pool({
     connectionString: process.env.DATABASE_URL,
-    max: 20, // Maximum number of clients in the pool
-    idleTimeoutMillis: 30000, // How long a client is allowed to remain idle before being closed
-    connectionTimeoutMillis: 2000, // How long to wait for a connection
+    max: 20, 
+    idleTimeoutMillis: 30000, 
+    connectionTimeoutMillis: 2000, 
 });
 
 pool.on('error', (err, client) => {
@@ -76,7 +66,6 @@ pool.on('connect', () => {
     console.log('Connected to PostgreSQL database');
 });
 
-// Create tables if they don't exist
 const initDb = async () => {
     const client = await pool.connect();
     try {
@@ -108,7 +97,7 @@ const initDb = async () => {
     }
 };
 
-// Initialize database with error handling
+
 (async () => {
     try {
         await initDb();
@@ -118,7 +107,9 @@ const initDb = async () => {
     }
 })();
 
-// Authentication middleware
+// const provider = new ethers.JsonRpcProvider(process.env.ETHEREUM_RPC_URL);
+// const contract = new ethers.Contract(process.env.CONTRACT_ADDRESS, contractABI, provider);
+
 const isAuthenticated = (req, res, next) => {
     if (req.session.userId) {
         return next();
@@ -126,12 +117,12 @@ const isAuthenticated = (req, res, next) => {
     res.status(401).send('Unauthorized');
 };
 
-// Blood Bank Login     WORKING!!!!!!!!!!!!!!!!!!!
+
 app.post('/api/bloodbank/login', async (req, res) => {
     try {
         const { licenseNumber, password } = req.body;
 
-        // Validate input
+
         if (!licenseNumber || !password) {
             return res.status(400).json({ error: 'License number and password are required' });
         }
@@ -170,17 +161,15 @@ app.post('/api/bloodbank/login', async (req, res) => {
     }
 });
 
-// Hospital Login
+
 app.post('/api/hospital/login', async (req, res) => {
     try {
         const { hospitalId, password } = req.body;
 
-        // Validate input
         if (!hospitalId || !password) {
             return res.status(400).json({ error: 'Hospital ID and password are required' });
         }
 
-        // Check if hospital exists
         const hospitalResult = await pool.query(
             'SELECT * FROM hospital_auth WHERE hospital_id = $1',
             [hospitalId]
@@ -192,13 +181,11 @@ app.post('/api/hospital/login', async (req, res) => {
 
         const hospital = hospitalResult.rows[0];
 
-        // Verify password
         const isValidPassword = await bcrypt.compare(password, hospital.password_hash);
         if (!isValidPassword) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
-        // Set session data
         req.session.userId = hospital.hospital_id;
         req.session.userType = 'hospital';
 
@@ -217,7 +204,6 @@ app.post('/api/hospital/login', async (req, res) => {
     }
 });
 
-// Logout route
 app.post('/api/logout', (req, res) => {
     req.session.destroy((err) => {
         if (err) {
@@ -227,38 +213,8 @@ app.post('/api/logout', (req, res) => {
     });
 });
 
-// Get current user
-app.get('/api/me', isAuthenticated, async (req, res) => {
-    try {
-        let userQuery;
-        if (req.session.userType === 'bloodbank') {
-            userQuery = await pool.query(
-                'SELECT license_number as id, name, city FROM blood_bank_auth WHERE license_number = $1',
-                [req.session.userId]
-            );
-        } else {
-            userQuery = await pool.query(
-                'SELECT hospital_id as id, name, city FROM hospital_auth WHERE hospital_id = $1',
-                [req.session.userId]
-            );
-        }
-
-        if (userQuery.rows.length === 0) {
-            return res.status(404).json({ error: 'User not found' });
-        }
-
-        const user = userQuery.rows[0];
-        res.json({
-            ...user,
-            type: req.session.userType
-        });
-    } catch (error) {
-        console.error('Error fetching user:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-});
-
-// Register Blood Bank
+ 
+ 
 app.post('/api/bloodbank/register', async (req, res) => {
     try {
         const {
@@ -273,46 +229,30 @@ app.post('/api/bloodbank/register', async (req, res) => {
             return res.status(400).json({ error: 'All fields are required' });
         }
 
-        // Generate unique bloodBankId (BB + random 6 digits)
-        const bloodBankId = 'BB' + Math.floor(100000 + Math.random() * 900000).toString();
-
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Store credentials in PostgreSQL
         await pool.query(
-            'INSERT INTO blood_bank_auth (blood_bank_id, password_hash, name, license_number, city) VALUES ($1, $2, $3, $4, $5)',
-            [bloodBankId, hashedPassword, name, licenseNumber, city]
+            'INSERT INTO blood_bank_auth (license_number, password_hash) VALUES ($1, $2)',
+            [licenseNumber, hashedPassword]
         );
 
-        let blockchainRegistration = null;
-        // if (contract) {
-        //     try {
-        //         const signer = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
-        //         const contractWithSigner = contract.connect(signer);
+        // Interact with the blockchain
+        const signer = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
+        const contractWithSigner = contract.connect(signer);
 
-        //         const tx = await contractWithSigner.registerBloodBank(
-        //             bloodBankId,
-        //             name,
-        //             licenseNumber,
-        //             city
-        //         );
-        //         await tx.wait();
-        //         blockchainRegistration = { transaction: tx.hash };
-        //     } catch (error) {
-        //         console.error('Blockchain registration failed:', error);
-        //         // Continue anyway since we have the database record
-        //     }
-        // }
+        const tx = await contractWithSigner.registerBloodBank(
+            licenseNumber,
+            name,
+            city
+        );
+        await tx.wait(); // Wait for the transaction to be mined
 
-        res.json({ 
-            success: true, 
-            bloodBankId,
-            ...(blockchainRegistration && { blockchain: blockchainRegistration })
-        });
+        res.status(201).json({ message: 'Blood bank registered successfully', transaction: tx.hash });
     } catch (error) {
         console.error('Registration error:', error);
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 

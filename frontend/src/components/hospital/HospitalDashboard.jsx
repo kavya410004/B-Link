@@ -4,6 +4,7 @@ import {
   UserPlusIcon,
   ClipboardDocumentListIcon,
 } from '@heroicons/react/24/outline'
+import Header from './Header'
 
 const navigationItems = [
   {
@@ -15,7 +16,7 @@ const navigationItems = [
   {
     name: 'Requested Units',
     description: 'View and track your blood unit requests',
-    href: '/hospital/dashboard',
+    href: '/hospital/requests',
     icon: ClipboardDocumentListIcon,
   },
 ]
@@ -29,24 +30,7 @@ const HospitalDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Header */}
-      <header className="bg-white/95 backdrop-blur-sm shadow-md">
-        <div className="mx-auto max-w-7xl px-6 py-4">
-          <div className="flex items-center justify-between">
-            <Link to="/" className="text-4xl font-extrabold tracking-tight text-blue-600 hover:text-blue-700 transition-colors">
-              B-Link
-            </Link>
-            <button
-              onClick={() => {
-                // Add logout logic here
-                navigate('/')
-              }}
-              className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors whitespace-nowrap"
-            >
-              Sign Out
-            </button>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Main Content */}
       <main className="py-10">

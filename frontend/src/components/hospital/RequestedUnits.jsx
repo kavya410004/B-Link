@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Switch } from '@headlessui/react'
 import { Link, useNavigate } from 'react-router-dom'
 
 const reservedUnitsData = [
@@ -12,7 +11,7 @@ const transfusedUnitsData = [
 ]
 
 const RequestedUnits = () => {
-  const [isReserved, setIsReserved] = useState(true)
+  const [activeTab, setActiveTab] = useState('reserved')
   const [reservedUnits, setReservedUnits] = useState(reservedUnitsData)
   const [transfusedUnits, setTransfusedUnits] = useState(transfusedUnitsData)
 
@@ -24,6 +23,73 @@ const RequestedUnits = () => {
     }
     setReservedUnits(updatedReserved)
   }
+
+  const ReservedUnitsTable = ({ units }) => (
+    <div className="mt-8">
+      <div className="overflow-x-auto">
+        <div className="inline-block min-w-full">
+          <div className="overflow-hidden rounded-lg border border-gray-200">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Blood Type</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Hospital</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Quantity</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 bg-white">
+                {units.map(unit => (
+                  <tr key={unit.id} className="hover:bg-gray-50">
+                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{unit.bloodType}</td>
+                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{unit.hospital}</td>
+                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{unit.quantity}</td>
+                    <td className="whitespace-nowrap px-6 py-4">
+                      <button
+                        onClick={() => handleUpdateTransfused(unit.id)}
+                        className="inline-flex items-center rounded-md bg-red-50 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                      >
+                        Update as Transfused
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const TransfusedUnitsTable = ({ units }) => (
+    <div className="mt-8">
+      <div className="overflow-x-auto">
+        <div className="inline-block min-w-full">
+          <div className="overflow-hidden rounded-lg border border-gray-200">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Blood Type</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Hospital</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Quantity</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 bg-white">
+                {units.map(unit => (
+                  <tr key={unit.id} className="hover:bg-gray-50">
+                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{unit.bloodType}</td>
+                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{unit.hospital}</td>
+                    <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{unit.quantity}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <>
@@ -37,7 +103,7 @@ const RequestedUnits = () => {
             onClick={() => {
               navigate('/')
             }}
-            className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors whitespace-nowrap"
+            className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors whitespace-nowrap"
           >
             Sign Out
           </button>
@@ -48,54 +114,25 @@ const RequestedUnits = () => {
 
     
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-8">
+      <div className="max-w-full mx-auto bg-white shadow-md p-8 w-full">
         <h2 className="text-3xl font-bold text-gray-900 text-center mb-6">Requested Blood Units</h2>
-        <div className="flex justify-center mb-4">
-          <Switch
-            checked={isReserved}
-            onChange={setIsReserved}
-            className={`${isReserved ? 'bg-blue-600' : 'bg-gray-200'} relative inline-flex items-center h-6 rounded-full w-12`}
+        <div className="flex justify-center mb-4 space-x-2">
+          <button
+            onClick={() => setActiveTab('reserved')}
+            className={`px-4 py-2 ${activeTab === 'reserved' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
           >
-            <span className="sr-only">Toggle between Reserved and Transfused</span>
-            <span className={`${isReserved ? 'translate-x-6' : 'translate-x-0'} inline-block w-6 h-6 transform bg-white rounded-full transition`} />
-          </Switch>
-          <span className="ml-2 text-sm font-medium text-gray-700">{isReserved ? 'Reserved' : 'Transfused'}</span>
+            Reserved
+          </button>
+          <button
+            onClick={() => setActiveTab('transfused')}
+            className={`px-4 py-2 ${activeTab === 'transfused' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+          >
+            Transfused
+          </button>
         </div>
 
         <div>
-          {isReserved ? (
-            <div>
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Reserved Blood Units</h3>
-              {reservedUnits.length > 0 ? (
-                reservedUnits.map(unit => (
-                  <div key={unit.id} className="flex justify-between items-center border-b py-2">
-                    <span>{unit.bloodType} from {unit.hospital} ({unit.quantity} units)</span>
-                    <button
-                      onClick={() => handleUpdateTransfused(unit.id)}
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      Update as Transfused
-                    </button>
-                  </div>
-                ))
-              ) : (
-                <p className="text-gray-500">No reserved blood units available.</p>
-              )}
-            </div>
-          ) : (
-            <div>
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Transfused Blood Units</h3>
-              {transfusedUnits.length > 0 ? (
-                transfusedUnits.map(unit => (
-                  <div key={unit.id} className="border-b py-2">
-                    <span>{unit.bloodType} from {unit.hospital} ({unit.quantity} units)</span>
-                  </div>
-                ))
-              ) : (
-                <p className="text-gray-500">No transfused blood units available.</p>
-              )}
-            </div>
-          )}
+          {activeTab === 'reserved' ? <ReservedUnitsTable units={reservedUnits} /> : <TransfusedUnitsTable units={transfusedUnits} />}
         </div>
       </div>
     </div>

@@ -12,6 +12,10 @@ import {
 import { useState, useEffect } from 'react';
 
 const AIPredictions = () => {
+
+  
+  console.log("AI Predictions")
+  console.log(localStorage.getItem('user'))
   // Sample data - Replace with actual data from your API
   const [transfusionData] = useState([
     { month: 'Aug', units: 180 },

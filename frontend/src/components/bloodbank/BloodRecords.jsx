@@ -10,6 +10,9 @@ const BloodRecords = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const navigate = useNavigate()
 
+  console.log("Blood Records")
+  console.log(localStorage.getItem('user'))
+
   useEffect(() => {
     fetchAllRecords()
   }, [fetchAllRecords])

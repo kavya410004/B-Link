@@ -16,6 +16,9 @@ const UnverifiedUnits = () => {
     isSafe: true
   })
 
+  console.log("Unverified Units")
+  console.log(localStorage.getItem('user'))
+
   useEffect(() => {
     fetchAllRecords()
   }, [fetchAllRecords])

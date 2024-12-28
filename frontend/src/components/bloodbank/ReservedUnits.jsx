@@ -7,6 +7,9 @@ const ReservedUnits = () => {
   const [records, setRecords] = useState([])
   const [isLoading, setIsLoading] = useState(true)
 
+  console.log("Reserved Units")
+  console.log(localStorage.getItem('user'))
+
   useEffect(() => {
     const fetchReservedRecords = async () => {
       try {

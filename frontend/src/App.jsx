@@ -39,7 +39,7 @@ function App() {
               <Route path="/hospital/register" element={<HospitalRegister />} />
               <Route path="/hospital/dashboard" element={<HospitalDashboard />} />
               <Route path="/hospital/recipient" element={<AddRecipient />} />
-              {/* <Route path="/hospital/requests" element={<RequestedUnits />} /> */}
+              <Route path="/hospital/requests" element={<RequestedUnits />} />
             </Routes>
           </div>
         </BloodRecordProvider>

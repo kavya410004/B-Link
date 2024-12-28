@@ -6,6 +6,7 @@ const DonorStatus = () => {
   const [searchResult, setSearchResult] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [result, setResult] = useState(null)
 
   const handleSearch = async (e) => {
     e.preventDefault()
@@ -19,9 +20,7 @@ const DonorStatus = () => {
         donorId: "D123456",
         bloodType: "O+",
         status: "TESTED_SAFE",
-        lastUpdated: "2023-12-22T10:30:00Z",
         units: 1,
-        donationDate: "2023-12-20T08:15:00Z",
         hospital: "City General Hospital",
         testResults: {
           hiv: "Negative",
@@ -42,6 +41,15 @@ const DonorStatus = () => {
     } finally {
       setIsLoading(false)
     }
+
+    // Dummy variable to simulate API response
+    const dummyResult = {
+      donorId: donorId,
+      status: 'TESTED_SAFE',
+      bloodType: 'O+',
+      units: 1
+    };
+    setResult(dummyResult);
   }
 
   return (
@@ -90,13 +98,8 @@ const DonorStatus = () => {
             </button>
           </form>
 
-          {/* Error Message */}
-          {error && (
-            <div className="mt-4 p-4 bg-red-50 rounded-md">
-              <p className="text-sm text-red-600">{error}</p>
-            </div>
-          )}
-
+          {/* Error Message removed */}
+          
           {/* Results */}
           {searchResult && (
             <div className="mt-6 bg-white shadow-sm rounded-lg p-6">
@@ -116,15 +119,36 @@ const DonorStatus = () => {
                     ${searchResult.status === 'TESTED_SAFE' ? 'bg-green-100 text-green-800' :
                       searchResult.status === 'NOT_VERIFIED' ? 'bg-yellow-100 text-yellow-800' :
                       searchResult.status === 'EXPIRED' ? 'bg-red-100 text-red-800' :
-                      'bg-gray-100 text-gray-800'}`}>
+                      'bg-gray-100 text-gray-800'}`}>  
                     {searchResult.status.replace('_', ' ')}
                   </span>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Last Updated</p>
-                  <p className="text-gray-900">
-                    {new Date(searchResult.lastUpdated).toLocaleDateString()}
-                  </p>
+                  <p className="text-sm text-gray-500">Units</p>
+                  <p className="text-gray-900">{searchResult.units}</p>
+                </div>
+              </div>
+            </div>
+          )}
+          {result && (
+            <div className="mt-6 bg-white shadow-sm rounded-lg p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Donor Status</h2>
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm text-gray-500">Donor ID</p>
+                  <p className="text-gray-900">{result.donorId}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Status</p>
+                  <p className="text-gray-900">{result.status}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Blood Type</p>
+                  <p className="text-gray-900">{result.bloodType}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Units</p>
+                  <p className="text-gray-900">{result.units}</p>
                 </div>
               </div>
             </div>
