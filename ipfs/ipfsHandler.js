@@ -2,8 +2,12 @@ import { create } from 'ipfs-http-client';
 import { Buffer } from 'buffer';
 
 class IPFSHandler {
-    constructor(ipfsNodeUrl = 'http://localhost:5001') {
-        this.ipfs = create({ url: ipfsNodeUrl });
+    constructor(ipfsNodeUrl = 'https://ipfs.infura.io:5001') {
+        this.ipfs = create({ 
+            host: 'ipfs.infura.io', 
+            port: 5001, 
+            protocol: 'https' 
+        });
     }
 
     /**
@@ -18,10 +22,7 @@ class IPFSHandler {
             'hepatitisB',
             'hepatitisC',
             'syphilis',
-            'malaria',
-            'pathogens',
-            'aboGrouping',
-            'rhFactor'
+            'malaria'
         ];
 
         // Check if all required fields are present and are boolean (except blood groups)
@@ -106,6 +107,20 @@ class IPFSHandler {
         } catch (error) {
             console.error('Error pinning content:', error);
             throw error;
+        }
+    }
+
+    /**
+     * Upload a file to IPFS
+     * @param {File} file - The file to upload
+     * @returns {Promise<string>} - The IPFS hash of the uploaded file
+     */
+    async uploadFile(file) {
+        try {
+            const { cid } = await this.ipfs.add(file);
+            return cid.toString();
+        } catch (error) {
+            throw new Error(`Upload failed: ${error.message}`);
         }
     }
 }

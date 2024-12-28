@@ -1,22 +1,40 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import axios from 'axios';
+import { useAuth } from '../../AuthContext'; // Import useAuth
 
 const BloodBankLogin = () => {
+  const { login } = useAuth(); // Get login function from context
   const [formData, setFormData] = useState({
     licenseNumber: '',
     password: '',
   })
+  const [errorMessage, setErrorMessage] = useState(''); // State for error messages
   const navigate = useNavigate()
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // Add login logic here
-    navigate('/bloodbank/dashboard')
+    setErrorMessage(''); // Clear previous error messages
+
+    try {
+      const response = await axios.post('http://localhost:3000/api/bloodbank/login', formData);
+      console.log(response.data);
+      login(response.data); // Call login with user data
+      // If successful, redirect to dashboard
+      navigate('/bloodbank/dashboard');
+    } catch (error) {
+      // Handle error response
+      if (error.response) {
+        console.log(error.response.data.error);
+        setErrorMessage(error.response.data.error || 'Login failed');
+      } else {
+        setErrorMessage('An error occurred. Please try again.');
+      }
+    }
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-      
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm shadow-md">
         <div className="mx-auto max-w-7xl px-6 py-4">
           <div className="flex items-center">
@@ -30,6 +48,7 @@ const BloodBankLogin = () => {
         <div>
           <h2 className="text-center text-3xl font-extrabold text-gray-900">LOG IN</h2>
         </div>
+        {errorMessage && <p className="text-red-500 text-center">{errorMessage}</p>} {/* Display error message */}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>

@@ -1,17 +1,36 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import axios from 'axios'; // Import axios for making HTTP requests
+import { useAuth } from '../../AuthContext'; // Import useAuth
 
 const HospitalLogin = () => {
+  const { login } = useAuth(); // Get login function from context
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
     hospitalId: '',
     password: ''
   })
+  const [errorMessage, setErrorMessage] = useState(''); // State for error messages
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    // Add actual login logic here
-    navigate('/hospital/dashboard')
+    setErrorMessage(''); // Clear previous error messages
+
+    try {
+      const response = await axios.post('http://localhost:3000/api/hospital/login', formData);
+      console.log(response.data);
+      login(response.data); // Call login with user data
+      // If successful, redirect to dashboard
+      navigate('/hospital/dashboard');
+    } catch (error) {
+      // Handle error response
+      if (error.response) {
+        console.log(error.response.data.error);
+        setErrorMessage(error.response.data.error || 'Login failed');
+      } else {
+        setErrorMessage('An error occurred. Please try again.');
+      }
+    }
   }
 
   return (
@@ -33,6 +52,7 @@ const HospitalLogin = () => {
             Welcome back! Please login to your account
           </p>
         </div>
+        {errorMessage && <p className="text-red-500 text-center">{errorMessage}</p>} {/* Display error message */}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm space-y-4">
             <div>

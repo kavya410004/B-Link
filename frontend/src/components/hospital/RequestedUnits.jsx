@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Switch } from '@headlessui/react'
+import { Link, useNavigate } from 'react-router-dom'
 
 const reservedUnitsData = [
   { id: 1, bloodType: 'A+', hospital: 'City Blood Bank', quantity: 2 },
@@ -25,6 +26,27 @@ const RequestedUnits = () => {
   }
 
   return (
+    <>
+    <header className="bg-white/95 backdrop-blur-sm shadow-md">
+      <div className="mx-auto max-w-7xl px-6 py-4">
+        <div className="flex items-center justify-between">
+          <Link to="/" className="text-4xl font-extrabold tracking-tight text-blue-600 hover:text-blue-700 transition-colors">
+            B-Link
+          </Link>
+          <button
+            onClick={() => {
+              navigate('/')
+            }}
+            className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors whitespace-nowrap"
+          >
+            Sign Out
+          </button>
+        </div>
+      </div>
+    </header>
+
+
+    
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-8">
         <h2 className="text-3xl font-bold text-gray-900 text-center mb-6">Requested Blood Units</h2>
@@ -77,6 +99,8 @@ const RequestedUnits = () => {
         </div>
       </div>
     </div>
+
+    </>
   )
 }
 

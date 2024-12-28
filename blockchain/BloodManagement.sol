@@ -36,10 +36,11 @@ contract BloodManagement {
 
     // State variables
     mapping(string => BloodUnit) public bloodUnits;           // bloodUnitId => BloodUnit
-    mapping(string => BloodBank) public bloodBanks;           // bloodBankId => BloodBank
+    mapping(string => BloodBank) public bloodBanks;           // licenseNumber => BloodBank
     mapping(address => bool) public authorizedInspectors;     // Addresses authorized to update test results
     address public owner;
     string[] public allBloodUnitIds;                         // Array to keep track of all blood unit IDs
+    string[] public allBloodBanks;                           // Array to keep track of all blood bank IDs
 
     // Events
     event BloodUnitAdded(string bloodUnitId, string bloodBankId, uint256 timestamp);
@@ -70,29 +71,29 @@ contract BloodManagement {
 
     // Blood Bank Management
     function registerBloodBank(
-        string memory _bloodBankId, 
         string memory _name,
         string memory _licenseNumber,
         string memory _city
     ) external {
-        require(bloodBanks[_bloodBankId].walletAddress == address(0), "Blood bank already registered");
+        require(bloodBanks[_licenseNumber].walletAddress == address(0), "Blood bank already registered");
         
-        bloodBanks[_bloodBankId] = BloodBank({
-            bloodBankId: _bloodBankId,
+        bloodBanks[_licenseNumber] = BloodBank({
+            bloodBankId: _licenseNumber, 
             name: _name,
             licenseNumber: _licenseNumber,
             city: _city,
             isVerified: false,
             walletAddress: msg.sender,
-            registrationTimestamp: block.timestamp
+            registrationTimestamp: block.timestamp 
         });
-
-        emit BloodBankRegistered(_bloodBankId, _licenseNumber);
+        
+        allBloodBanks.push(_licenseNumber);  // Add to tracking array
+        emit BloodBankRegistered(_licenseNumber, _licenseNumber);
     }
 
-    function verifyBloodBank(string memory _bloodBankId) external onlyOwner {
-        require(!bloodBanks[_bloodBankId].isVerified, "Blood bank already verified");
-        bloodBanks[_bloodBankId].isVerified = true;
+    function verifyBloodBank(string memory _licenseNumber) external onlyOwner {
+        require(!bloodBanks[_licenseNumber].isVerified, "Blood bank already verified");
+        bloodBanks[_licenseNumber].isVerified = true;
     }
 
     // Blood Unit Management
@@ -191,7 +192,12 @@ contract BloodManagement {
 
     function getBloodBankId(address _walletAddress) internal view returns (string memory) {
         // This is a simplified version. In production, you'd want a more efficient way to look this up
-        return bloodBanks[bloodBanks[msg.sender].bloodBankId].bloodBankId;
+        for (uint256 i = 0; i < allBloodBanks.length; i++) {
+            if (bloodBanks[allBloodBanks[i]].walletAddress == _walletAddress) {
+                return bloodBanks[allBloodBanks[i]].licenseNumber;
+            }
+        }
+        revert("Blood bank not found for the given wallet address");
     }
 
     function getBloodUnitsByStatus(BloodStatus _status) public view returns (string[] memory) {
@@ -294,14 +300,5 @@ contract BloodManagement {
         }
 
         return false;
-    }
-
-    // Admin functions
-    function addInspector(address _inspector) external onlyOwner {
-        authorizedInspectors[_inspector] = true;
-    }
-
-    function removeInspector(address _inspector) external onlyOwner {
-        authorizedInspectors[_inspector] = false;
     }
 }

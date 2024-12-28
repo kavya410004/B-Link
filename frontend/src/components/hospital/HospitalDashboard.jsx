@@ -23,6 +23,9 @@ const navigationItems = [
 const HospitalDashboard = () => {
   const navigate = useNavigate()
 
+  console.log("Hospital Dashboard")
+  console.log(localStorage.getItem('user'))
+
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Header */}

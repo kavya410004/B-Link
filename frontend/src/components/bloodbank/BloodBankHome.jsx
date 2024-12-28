@@ -35,6 +35,11 @@ const navigationItems = [
 ]
 
 const BloodBankHome = () => {
+
+  
+
+  console.log("Blood Bank Dashboard")
+  console.log(localStorage.getItem('user'))
   return (
     <div className="min-h-screen bg-gray-100">
       <Header />
